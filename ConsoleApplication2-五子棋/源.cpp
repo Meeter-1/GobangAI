@@ -12,61 +12,40 @@ using namespace std;
 
 int black = 0, white = 0;//黑子数和白子数
 int ipos, jpos;//鼠标位置
-int xpos, ypos;
+int xpos, ypos;//鼠标位置
 
-//ExMessage m;//消息变量
+
 IMAGE img[3];//存放图片
 
 bool gg = true;
 bool ff = true;
-bool flag = 0;
+bool flag = 0;//1 表ai先手  0表玩家先手
 /*************人机对战***************/
-double cut_count = 0;
-double search_count = 0;
-int pos[2] = { 0 };
-//bool is_ai = 1;
-int list11[250][2];
-int list22[250][2];
-int list33[250][2];
-int list1[250][2];
-int list2[250][2];
-int list3[250][2];
-int list_all[15][15];
-int blank_list[250][2];
-int pt[2] = { 0 };
-int last_pos[2] = { 0 };
+
+
+
+
 #define DEPTH 3;
 
 
-double score_all_arr[250] = { 0 };  //得分形状的位置 用于计算如果有相交 得分翻倍  自己
-int score_all_shape[250][5][2] = { 0 };
-int score_all_direct[250][2] = { 0 };
-double my_score = 0;
-double score_all_enemy_arr[250] = { 0 };  //敌方 得分形状的位置
-int score_all_enemy_shape[250][5][2] = { 0 };
-int score_all_enemy_direct[250][2] = { 0 };
-double enemy_score = 0;
-int my_list[250][2] = { 0 };
-int enemy_list[250][2] = { 0 };
-
-
 float ratio = 1;//进攻系数  大于1 进攻型  小于1 防守型
-double shape_score[16][2][6] = { {{100}, {0, 1, 1, 0, 0} },
-								{{100}, {0, 0, 1, 1, 0}},
+//得分形状	
+double shape_score[16][2][6] = {{{100}, {0, 1, 1, 0, 0 }},
+								{{100}, {0, 0, 1, 1, 0 }},
 								{{200}, {1, 1, 0, 1, 0 }},
-	{{200}, {1, 0, 1, 1, 0 }},
+								{{200}, {1, 0, 1, 1, 0 }},
 								{{500}, {0, 0, 1, 1, 1 }},
 								{{500}, {1, 1, 1, 0, 0} },
-									{ {5000}, {0, 1, 1, 1, 0} },
-									{ {5000 }, { 0, 1, 0, 1, 1, 0 } },
-									{ {5000}, {0, 1, 1, 0, 1, 0} },
-									{ {5000 }, { 1, 1, 1, 0, 1 } },
-									{ {5000}, {1, 1, 0, 1, 1} },
-									{ {5000 }, { 1, 0, 1, 1, 1 } },
-									{ {5000}, {1, 1, 1, 1, 0} },
-									{ {5000}, {0, 1, 1, 1, 1} },
-									{ {30000}, {0, 1, 1, 1, 1, 0} },
-								{ {99999999}, {1, 1, 1, 1, 1} } }; //99999999
+								{{5000}, {0, 1, 1, 1, 0} },
+								{{5000}, { 0, 1, 0, 1, 1, 0 } },
+								{{5000}, {0, 1, 1, 0, 1, 0} },
+								{{5000}, { 1, 1, 1, 0, 1 } },
+								{{5000}, {1, 1, 0, 1, 1} },
+								{{5000}, { 1, 0, 1, 1, 1 } },
+								{{5000}, {1, 1, 1, 1, 0} },
+								{{5000}, {0, 1, 1, 1, 1} },
+								{{30000}, {0, 1, 1, 1, 1, 0} },
+								{{99999999}, {1, 1, 1, 1, 1} } }; //99999999
 
 
 
@@ -84,7 +63,7 @@ void Loadimg()
 int map[NUM][NUM] = { 0 };
 int num[NUM][NUM] = { 0 };
 
-void initmap()
+void initmap()//初始化落子位置
 {
 	for (int i = 0; i < 15; i++)
 	{
@@ -100,7 +79,8 @@ void initmap()
 int prepos_x, prepos_y, pos_x, pos_y;
 POINT lastpts[] = { 0 };
 POINT pts[] = { 0 };
-void Drawmap(int Pos_x ,int Pos_y)
+//int pos[2] = { 0 };
+void Drawmap(int Pos_x ,int Pos_y)//更新落子
 {
 	pos_x = Pos_x;
 	pos_y = Pos_y;
@@ -125,7 +105,7 @@ void Drawmap(int Pos_x ,int Pos_y)
 				//polygon(pts, 8);
 				num[pos_x][pos_y] = 1;
 				if (black + white > 1)
-				{
+				{//将前一个落子上的标志去除（覆盖）
 					putimage(prepos_x * SIZE, prepos_y * SIZE, &img[2]);
 					string st = to_string(black + white - 1);
 					strcpy_s(demo, st.c_str());
@@ -162,7 +142,7 @@ void Drawmap(int Pos_x ,int Pos_y)
 			prepos_y = Pos_y;
 }
 
-void draw_line()
+void draw_line()//画棋盘网格线
 {
 	setlinecolor(BLACK);
 	for (int i = 0; i < NUM ; i++)
@@ -172,7 +152,26 @@ void draw_line()
 	}
 }
 
-void initlist()
+int list11[250][2];//保存ai落子
+int list22[250][2];//保存玩家落子
+int list33[250][2];//保存所有落子
+int list1[250][2];//保存递归中ai落子
+int list2[250][2];//保存递归中玩家落子
+int list3[250][2];//保存递归中所有落子
+int blank_list[250][2];//保存空白位置
+
+double score_all_arr[250] = { 0 };  //我方得分形状的位置 用于计算如果有相交 得分翻倍  自己
+int score_all_shape[250][5][2] = { 0 };//得分形状的位置
+int score_all_direct[250][2] = { 0 };//得分形状的方向  横竖斜
+double my_score = 0;
+double score_all_enemy_arr[250] = { 0 };  //敌方 得分形状的位置
+int score_all_enemy_shape[250][5][2] = { 0 }; //得分形状的位置
+int score_all_enemy_direct[250][2] = { 0 };//得分形状的方向  横竖斜
+double enemy_score = 0;
+
+int my_list[250][2] = { 0 };//保存我方落子
+int enemy_list[250][2] = { 0 };//保存敌方落子
+void initlist()//初始化数组
 {
 	for (int i = 0; i < 250; i++)
 	{
@@ -212,7 +211,7 @@ void initlist()
 
 }
 
-void update_list3()
+void update_list3()//保存递归中的所有落子位置
 {
 	for (int i = 0; i < 250; i++)
 	{
@@ -263,7 +262,7 @@ void update_list3()
 
 }
 
-void update_list33()
+void update_list33()//保存所有落子位置
 {
 	int i = 0; int j = 0;
 	while (list11[i][0] != -1)
@@ -309,7 +308,7 @@ void update_list33()
 
 }
 
-void update_blank()
+void update_blank()//更新空白落子位置
 {
 	int k = 0;
 	while (list3[k][0] != -1)
@@ -332,7 +331,7 @@ void update_blank()
 		k++;
 	}
 }
-void fill_list()
+void fill_list()//将list11 list22 的落子位置保存到list1 list2 中 用于递归落子
 {
 	int i = 0;
 	while (list11[i][0] != -1)
@@ -350,7 +349,7 @@ void fill_list()
 	}
 }
 
-void Click()
+void Click()//PVP 获取鼠标落子
 {
 
 	ExMessage m;
@@ -379,7 +378,7 @@ void Click()
 }
 
 
-int Judge(int a)
+int Judge(int a)//判断是否五子
 {
 
 
@@ -414,7 +413,7 @@ int Tie()
 	return 1;
 }
 
-void Judge_ending()
+void Judge_ending()//结束弹窗
 {
 	if (Judge(1))
 	{//判断黑子是否获胜
@@ -436,7 +435,7 @@ void Judge_ending()
 	}
 }
 
-int mmxMap[15][15] = { 0 };
+int mmxMap[15][15] = { 0 };//保存递归中产生的落子位置，用于判断是否五子
 void init_mmxMap()
 {
 
@@ -449,18 +448,18 @@ void init_mmxMap()
 	}
 	for (int i = 0; i < 250; i++)
 	{
-		//if (list1[i][0] == -1)break;
+		if (list1[i][0] == -1)break;
 		if (list1[i][0] != -1)mmxMap[list1[i][0]][list1[i][1]] = 1;
 	}
 	for (int i = 0; i < 250; i++)
 	{
-		//if (list2[i][0] == -1)break;
+		if (list2[i][0] == -1)break;
 		if (list2[i][0] != -1)mmxMap[list2[i][0]][list2[i][1]] = 2;
 	}
 }
 
 
-int Judge1(int a)
+int Judge1(int a)//递归中判断是否五子
 {
 
 	init_mmxMap();
@@ -482,7 +481,7 @@ int Judge1(int a)
 }
 
 int Tie1()
-{//判断平局
+{//递归中判断平局
 	init_mmxMap();
 	for (int i = 0; i < NUM; i++)
 	{
@@ -497,7 +496,7 @@ int Tie1()
 
 
 
-void play_board()
+void play_board()//对弈界面
 {
 	initgraph(BOARD, BOARD);//创建窗口
 	Loadimg(); //加载图片资源
@@ -514,7 +513,7 @@ void play_board()
 	}
 }
 
-void end_board()
+void end_board()//结束界面
 {
 	initgraph(SIZE * 12, SIZE * 12);//创建窗口
 	Loadimg(); //加载图片资源
@@ -538,7 +537,7 @@ void end_board()
 }
 
 
-void begin_board()
+void begin_board()//开始界面
 {
 	initgraph(SIZE * 12, SIZE * 12);//创建窗口
 	Loadimg(); //加载图片资源
@@ -563,7 +562,7 @@ void begin_board()
 
 
 
-void chose_board()
+void chose_board()//选择 PVP or PVE
 {
 	initgraph(SIZE * 12, SIZE * 12);//创建窗口
 	Loadimg(); //加载图片资源
@@ -634,15 +633,14 @@ class Gobang_AI
 		int y = 0;
 	};
 
-	//Chess board[15][15];
 
-	//int 
 public:
 
-	int next_point[2] = { 0 };
-	double value = 0;
-	int next_step[2] = { 0 };
+	int next_point[2] = { 0 };//递归返回的最好落子位置
+	double value = 0;//分数 敌我当前各自总分的加权和
+	int next_step[2] = { 0 };//递归中的选择落子 位置
 
+	//顺序搜索，优先搜索最后落子相邻的空白位置
 	void order()
 	{
 		// list3 中最后一个落子
@@ -679,12 +677,9 @@ public:
 			}
 			i++;
 		}
-
-
-
 	}
 
-	bool is_ai()
+	bool is_ai()//判断是否ai落子回合
 	{
 		int change = black + white + flag;
 		if (change % 2 == 1)
@@ -694,8 +689,12 @@ public:
 	}
 
 
-	int calMap[15][15];
-	double scoreMap[15][15];
+	
+
+	int calMap[15][15];//保存敌我落子位置
+	//double scoreMap[15][15];
+	int pt[2] = { 0 };//计算分数的落子位置
+	//计算落子在一个方向上的最高分
 	double cal_score(int m, int n, int x_decrict, int y_derice, bool is_mine)
 	{
 		if (is_mine)
@@ -1016,6 +1015,7 @@ public:
 		}
 	}
 
+	//计算敌我 当前的各自总分数
 	double evaluation(bool is_ai)
 	{
 		double total_score = 0;
@@ -1025,7 +1025,7 @@ public:
 			for (int j = 0; j < 15; j++)
 			{
 				calMap[i][j] = 0;
-				scoreMap[i][j] = 0;
+				//scoreMap[i][j] = 0;
 			}
 		}
 		// 判断是否为 ai 方
@@ -1154,7 +1154,7 @@ public:
 		return total_score;
 	}
 
-
+	//当前选择位置和list3中有无相邻落子位置
 	bool has_neightnor()
 	{
 		for (int i = -1; i < 2; i++)
@@ -1175,7 +1175,8 @@ public:
 		}
 		return false;
 	}
-
+	
+	//负值极大算法搜索
 	double negamax(bool is_AI, int depth, double alpha, double beta)
 	{
 
@@ -1190,7 +1191,7 @@ public:
 		order();  // 按搜索顺序排序  提高剪枝效率
 
 			//遍历每一个候选步
-		int i = 0; search_count = 0;
+		int i = 0; 
 		while (blank_list[i][0] != -1)
 		{
 			i++;
@@ -1198,7 +1199,6 @@ public:
 
 		for (int next = 0; next < i; next++)
 		{
-			search_count += 1;
 			next_step[0] = blank_list[next][0];
 			next_step[1] = blank_list[next][1];
 			//i++;
@@ -1298,7 +1298,6 @@ public:
 				if (value >= beta)
 				{//alpha + beta剪枝点
 				//当当前value > beta 时相当于 对手的 value < -alpha, 对手肯定不会考虑这个选择
-					cut_count += 1;
 					return beta;
 				}
 				alpha = value;
@@ -1307,94 +1306,80 @@ public:
 		}
 		return alpha;
 	}
-
+	int last_pos[2] = { 0 };//获取最佳落子位置
 	void AI()
 	{
-		//Move move;
-		cut_count = 0;
-		search_count = 0;
-		fill_list();
-		update_list3();
+		fill_list();//将list11 list22 存到list1 list2 数组中
+		update_list3();//更新list3 递归中所有落子位置
 		negamax(true, 3, -99999999, 99999999);//初始化 负值极大算法
-		//move.x = next_point[0];
-		//move.y = next_point[1];
-		last_pos[0] = next_point[0];
+		last_pos[0] = next_point[0];//获取最佳落子
 		last_pos[1] = next_point[1];
-		cout << "本次共剪枝次数：" << cut_count << endl;
-		cout << "本次共搜索次数：" << search_count << endl;
-		//return move;
 	}
 
 	void PlayPVE() //人机对战
 	{
-		initmap();
-		play_board();
-		gg = true;
-		bool turn;
-		black = 0; white = 0;
-		initlist();
+		initmap();//清空落子位置
+		play_board();//加载对弈界面
+		gg = true;//while循环标志位
+		bool turn;//1 表ai下棋   0表玩家下棋
+		black = 0; white = 0;//黑白子数清零
+		initlist();//各数组初始化
 		while (gg)
 		{
-			turn = is_ai();
-			if (turn)
+			turn = is_ai();//判断哪方下棋
+			if (turn)//AI回合
 			{
-				if (black + white == 0)
+				if (black + white == 0)//AI先手 下第一子
 				{
 					last_pos[0] = 7;
 					last_pos[1] = 7;
 					list11[0][0] = last_pos[0];
 					list11[0][1] = last_pos[1];
 					update_list33();
-					//update_blank();
 					map[7][7] = 1;
-					black++; turn = is_ai();
+					black++; 
 					Drawmap(7, 7);//更新地图
-
-					Judge_ending();
-					if (!gg)break;
+					//Judge_ending();//判断是否结束
+					//if (!gg)break;
+					turn = is_ai();
 				}
 				else
 				{
-					//Move nextmove;
 					AI();
-					xpos = last_pos[0];
+					xpos = last_pos[0];//获取ai落子位置
 					ypos = last_pos[1];
 
 					int j = 0;
 					while (list11[j][0] != -1)
-					{
+					{//保存ai落子
 						j++;
 					}
 					list11[j][0] = last_pos[0];
 					list11[j][1] = last_pos[1];
-					update_list33();
-					//update_blank();
+					update_list33();//更新所有落子位置
 					if (flag)
 					{//AI先手 黑子
-						map[xpos][ypos] = 1;
-						black++; turn = is_ai();
+						map[xpos][ypos] = 1;//该位置已落黑子
+						black++; 
 						Drawmap(xpos, ypos);//更新地图
-						Judge_ending();
+						Judge_ending();//判断是否结束 结束 gg标志位取反
 						if (!gg)break;
+						turn = is_ai();
 
 					}
 					else if (!flag)
 					{//AI后手 白子
 						map[xpos][ypos] = 2;
-						white++; turn = is_ai();
+						white++; 
 						Drawmap(xpos, ypos);//更新地图
-						Judge_ending();
+						Judge_ending();//判断是否结束 结束 gg标志位取反
 						if (!gg)break;
+						turn = is_ai();
 					}
-
 				}
-
 			}
-			else if (!turn)
+			else if (!turn)//玩家回合
 			{
-				int c = 0;
-
-				//Drawmap();//更新地图
 				Judge_ending();
 				if (!gg)break;
 
@@ -1411,28 +1396,26 @@ public:
 					}
 				}
 
-				last_pos[0] = ipos;
-				last_pos[1] = jpos;
-				if (map[ipos][jpos] == 0 && !flag && c == 0 && !turn)
+				if (map[ipos][jpos] == 0 && !flag  && !turn)
 				{//human先手 黑子
 					map[ipos][jpos] = 1;
-					black++; turn = is_ai();
-					c++;
+					black++; 
 					Drawmap(ipos, jpos);//更新地图
 					Judge_ending();
 					if (!gg)break;
-
+					turn = is_ai();
 				}
-				else if (map[ipos][jpos] == 0 && !turn && c == 0)
+				else if (map[ipos][jpos] == 0 && !turn )
 				{//human后手 白子
 					map[ipos][jpos] = 2;
-					white++; c++; turn = is_ai();
+					white++; 
 					Drawmap(ipos, jpos);//更新地图
 					Judge_ending();
 					if (!gg)break;
+					turn = is_ai();
 				}
 				int j = 0;
-				while (list22[j][0] != -1)
+				while (list22[j][0] != -1)//保存玩家落子位置
 				{
 					j++;
 				}
@@ -1442,7 +1425,7 @@ public:
 			}
 			
 		}
-		end_board();
+		end_board();//加载结束界面
 	}
 
 };
@@ -1459,7 +1442,7 @@ void Click3() //人机对战选择谁先手
 		m = getmessage(EX_MOUSE);//得到鼠标消息
 		if (m.message == WM_LBUTTONDOWN)//鼠标左键按下
 		{
-			if ((int)m.x >= 125 && (int)m.x <= 355 && (int)m.y >= 125 && (int)m.y <= 235)                 // RECT r = { 120, 120, 360, 240 };RECT t = { 120, 240, 360, 360 };
+			if ((int)m.x >= 125 && (int)m.x <= 355 && (int)m.y >= 125 && (int)m.y <= 235)     //鼠标响应区域 RECT r = { 120, 120, 360, 240 };RECT t = { 120, 240, 360, 360 };
 			{
 				flag = 1;//ai先
 				gg = false;
@@ -1539,7 +1522,7 @@ int main()
 	ff = true;
 	while (ff)
 	{
-		begin_board();
+		begin_board();//加载开始界面
 		Click1();
 		Click2();
 	}
