@@ -1,26 +1,26 @@
 #include <graphics.h>
 #include <math.h>
-#include<easyx.h>//Í¼ĞÎ¿â
+#include<easyx.h>//å›¾å½¢åº“
 #include <iostream>
 #include <string>
 #include <list>
 
 using namespace std;
 
-#define SIZE 40 //Íø¸ñ´óĞ¡
-#define BOARD 610 //½çÃæ³¤£¬¿í
+#define SIZE 40 //ç½‘æ ¼å¤§å°
+#define BOARD 610 //ç•Œé¢é•¿ï¼Œå®½
 
-int black = 0, white = 0;//ºÚ×ÓÊıºÍ°××ÓÊı
-int ipos, jpos;//Êó±êÎ»ÖÃ
+int black = 0, white = 0;//é»‘å­æ•°å’Œç™½å­æ•°
+int ipos, jpos;//é¼ æ ‡ä½ç½®
 int xpos, ypos;
 
-//ExMessage m;//ÏûÏ¢±äÁ¿
-IMAGE img[3];//´æ·ÅÍ¼Æ¬
+//ExMessage m;//æ¶ˆæ¯å˜é‡
+IMAGE img[3];//å­˜æ”¾å›¾ç‰‡
 
 bool gg = true;
 bool ff = true;
 bool flag = 0;
-/*************ÈË»ú¶ÔÕ½***************/
+/*************äººæœºå¯¹æˆ˜***************/
 double cut_count = 0;
 double search_count = 0;
 int pos[2] = { 0 };
@@ -35,14 +35,14 @@ int list_all[15][15];
 int blank_list[250][2];
 int pt[2] = { 0 };
 int last_pos[2] = { 0 };
-#define DEPTH 5;
+#define DEPTH 3;
 
 
-double score_all_arr[250] = { 0 };  //µÃ·ÖĞÎ×´µÄÎ»ÖÃ ÓÃÓÚ¼ÆËãÈç¹ûÓĞÏà½» µÃ·Ö·­±¶  ×Ô¼º
+double score_all_arr[250] = { 0 };  //å¾—åˆ†å½¢çŠ¶çš„ä½ç½® ç”¨äºè®¡ç®—å¦‚æœæœ‰ç›¸äº¤ å¾—åˆ†ç¿»å€  è‡ªå·±
 int score_all_shape[250][5][2] = { 0 };
 int score_all_direct[250][2] = { 0 };
 double my_score = 0;
-double score_all_enemy_arr[250] = { 0 };  //µĞ·½ µÃ·ÖĞÎ×´µÄÎ»ÖÃ
+double score_all_enemy_arr[250] = { 0 };  //æ•Œæ–¹ å¾—åˆ†å½¢çŠ¶çš„ä½ç½®
 int score_all_enemy_shape[250][5][2] = { 0 };
 int score_all_enemy_direct[250][2] = { 0 };
 double enemy_score = 0;
@@ -50,7 +50,7 @@ int my_list[250][2] = { 0 };
 int enemy_list[250][2] = { 0 };
 
 
-float ratio = 1;//½ø¹¥ÏµÊı  ´óÓÚ1 ½ø¹¥ĞÍ  Ğ¡ÓÚ1 ·ÀÊØĞÍ
+float ratio = 1;//è¿›æ”»ç³»æ•°  å¤§äº1 è¿›æ”»å‹  å°äº1 é˜²å®ˆå‹
 double shape_score[16][2][6] = { {{100}, {0, 1, 1, 0, 0} },
 								{{100}, {0, 0, 1, 1, 0}},
 								{{200}, {1, 1, 0, 1, 0 }},
@@ -356,21 +356,21 @@ void Click()
 	ExMessage m;
 	flushmessage(EX_MOUSE);
 	//ExMessage getmessage(BYTE filter = EX_MOUSE);
-	m = getmessage(EX_MOUSE);//µÃµ½Êó±êÏûÏ¢
+	m = getmessage(EX_MOUSE);//å¾—åˆ°é¼ æ ‡æ¶ˆæ¯
 	if (m.message == WM_LBUTTONDOWN) {
-		ipos = (int)(((double)m.x) / SIZE);//»»ËãÊó±êÎ»ÖÃ
+		ipos = (int)(((double)m.x) / SIZE);//æ¢ç®—é¼ æ ‡ä½ç½®
 		jpos = (int)(((double)m.y) / SIZE);
 		if (map[ipos][jpos] == 0 && black == white)
-		{//Âä×Ó´¦Ã»×Ó£¬ÇÒºÚ×ÓºÍ°××ÓÒ»Ñù¶à
+		{//è½å­å¤„æ²¡å­ï¼Œä¸”é»‘å­å’Œç™½å­ä¸€æ ·å¤š
 			map[ipos][jpos] = 1;
 			black++;
-			Drawmap(ipos, jpos);//¸üĞÂµØÍ¼
+			Drawmap(ipos, jpos);//æ›´æ–°åœ°å›¾
 		}
 		else if (map[ipos][jpos] == 0 && black > white)
-		{//Âä×Ó´¦Ã»×Ó£¬ÇÒºÚ×Ó±È°××Ó¶à
+		{//è½å­å¤„æ²¡å­ï¼Œä¸”é»‘å­æ¯”ç™½å­å¤š
 			map[ipos][jpos] = 2;
 			white++;
-			Drawmap(ipos, jpos);//¸üĞÂµØÍ¼	
+			Drawmap(ipos, jpos);//æ›´æ–°åœ°å›¾	
 		}
 	}
 
@@ -388,13 +388,13 @@ int Judge(int a)
 		for (int j = 0; j < NUM; j++)
 		{
 			if (j + 4 < NUM && map[i][j] == a && map[i][j + 1] == a && map[i][j + 2] == a && map[i][j + 3] == a && map[i][j + 4] == a)
-				return 1;//ÅĞ¶ÏĞĞ
+				return 1;//åˆ¤æ–­è¡Œ
 			else if (i + 4 < NUM && map[i][j] == a && map[i + 1][j] == a && map[i + 2][j] == a && map[i + 3][j] == a && map[i + 4][j] == a)
-				return 1;//ÅĞ¶ÏÁĞ
+				return 1;//åˆ¤æ–­åˆ—
 			else if (i + 4 < NUM && j + 4 < NUM && map[i][j] == a && map[i + 1][j + 1] == a && map[i + 2][j + 2] == a && map[i + 3][j + 3] == a && map[i + 4][j + 4] == a)
-				return 1;//ÅĞ¶ÏÓÒÏÂ
+				return 1;//åˆ¤æ–­å³ä¸‹
 			else if (i > 4 && j + 4 < NUM && map[i][j] == a && map[i - 1][j + 1] == a && map[i - 2][j + 2] == a && map[i - 3][j + 3] == a && map[i - 4][j + 4] == a)
-				return 1;//ÅĞ¶Ï×óÏÂ
+				return 1;//åˆ¤æ–­å·¦ä¸‹
 		}
 			//j > 3 && i + 4
 	}
@@ -402,12 +402,12 @@ int Judge(int a)
 }
 
 int Tie()
-{//ÅĞ¶ÏÆ½¾Ö
+{//åˆ¤æ–­å¹³å±€
 	for (int i = 0; i < NUM; i++)
 	{
 		for (int j = 0; j < NUM; j++)
 		{
-			if (map[i][j] == 0)//ÆåÅÌÉÏ»¹ÓĞ¿Õ¸ñ
+			if (map[i][j] == 0)//æ£‹ç›˜ä¸Šè¿˜æœ‰ç©ºæ ¼
 				return 0;
 		}
 	}
@@ -417,20 +417,20 @@ int Tie()
 void Judge_ending()
 {
 	if (Judge(1))
-	{//ÅĞ¶ÏºÚ×ÓÊÇ·ñ»ñÊ¤
-		MessageBox(NULL, _T("ºÚ×Ó»ñÊ¤£¡"), _T("ÓÎÏ·ÌáÊ¾"), MB_OK | MB_SYSTEMMODAL);
+	{//åˆ¤æ–­é»‘å­æ˜¯å¦è·èƒœ
+		MessageBox(NULL, _T("é»‘å­è·èƒœï¼"), _T("æ¸¸æˆæç¤º"), MB_OK | MB_SYSTEMMODAL);
 		gg = false;
 		//break;
 	}
 	if (Judge(2))
-	{//ÅĞ¶Ï°××ÓÊÇ·ñ»ñÊ¤
-		MessageBox(NULL, _T("°××Ó»ñÊ¤£¡"), _T("ÓÎÏ·ÌáÊ¾"), MB_OK | MB_SYSTEMMODAL);
+	{//åˆ¤æ–­ç™½å­æ˜¯å¦è·èƒœ
+		MessageBox(NULL, _T("ç™½å­è·èƒœï¼"), _T("æ¸¸æˆæç¤º"), MB_OK | MB_SYSTEMMODAL);
 		gg = false;
 		//break;
 	}
 	if (Tie())
-	{//Èç¹ûÓÎÏ·Æ½¾Ö
-		MessageBox(NULL, _T("Æì¹ÄÏàµ±µÄ¶ÔÊÖ£¡"), _T("ÓÎÏ·ÌáÊ¾"), MB_OK | MB_SYSTEMMODAL);
+	{//å¦‚æœæ¸¸æˆå¹³å±€
+		MessageBox(NULL, _T("æ——é¼“ç›¸å½“çš„å¯¹æ‰‹ï¼"), _T("æ¸¸æˆæç¤º"), MB_OK | MB_SYSTEMMODAL);
 		gg = false;
 		//break;
 	}
@@ -469,26 +469,26 @@ int Judge1(int a)
 		for (int j = 0; j < NUM; j++)
 		{
 			if (j + 4 < NUM && mmxMap[i][j] == a && mmxMap[i][j + 1] == a && mmxMap[i][j + 2] == a && mmxMap[i][j + 3] == a && mmxMap[i][j + 4] == a)
-				return 1;//ÅĞ¶ÏĞĞ
+				return 1;//åˆ¤æ–­è¡Œ
 			else if (i + 4 < NUM && mmxMap[i][j] == a && mmxMap[i + 1][j] == a && mmxMap[i + 2][j] == a && mmxMap[i + 3][j] == a && mmxMap[i + 4][j] == a)
-				return 1;//ÅĞ¶ÏÁĞ
+				return 1;//åˆ¤æ–­åˆ—
 			else if (i + 4 < NUM && j + 4 < NUM && mmxMap[i][j] == a && mmxMap[i + 1][j + 1] == a && mmxMap[i + 2][j + 2] == a && mmxMap[i + 3][j + 3] == a && mmxMap[i + 4][j + 4] == a)
-				return 1;//ÅĞ¶ÏÓÒÏÂ
+				return 1;//åˆ¤æ–­å³ä¸‹
 			else if (i > 4 && j + 4 < NUM && mmxMap[i][j] == a && mmxMap[i - 1][j + 1] == a && mmxMap[i - 2][j + 2] == a && mmxMap[i - 3][j + 3] == a && mmxMap[i - 4][j + 4] == a)
-				return 1;//ÅĞ¶Ï×óÏÂ
+				return 1;//åˆ¤æ–­å·¦ä¸‹
 		}//j > 3 && i + 4
 	}
 	return 0;
 }
 
 int Tie1()
-{//ÅĞ¶ÏÆ½¾Ö
+{//åˆ¤æ–­å¹³å±€
 	init_mmxMap();
 	for (int i = 0; i < NUM; i++)
 	{
 		for (int j = 0; j < NUM; j++)
 		{
-			if (mmxMap[i][j] == 0)//ÆåÅÌÉÏ»¹ÓĞ¿Õ¸ñ
+			if (mmxMap[i][j] == 0)//æ£‹ç›˜ä¸Šè¿˜æœ‰ç©ºæ ¼
 				return 0;
 		}
 	}
@@ -499,10 +499,10 @@ int Tie1()
 
 void play_board()
 {
-	initgraph(BOARD, BOARD);//´´½¨´°¿Ú
-	Loadimg(); //¼ÓÔØÍ¼Æ¬×ÊÔ´
-	putimage(0, 0, &img[0]);//ÆåÅÌ±³¾°É«
-	draw_line();//»­Ïß
+	initgraph(BOARD, BOARD);//åˆ›å»ºçª—å£
+	Loadimg(); //åŠ è½½å›¾ç‰‡èµ„æº
+	putimage(0, 0, &img[0]);//æ£‹ç›˜èƒŒæ™¯è‰²
+	draw_line();//ç”»çº¿
 	black = 0, white = 0;
 	for (int i = 0; i < NUM; i++)
 	{
@@ -516,10 +516,10 @@ void play_board()
 
 void end_board()
 {
-	initgraph(SIZE * 12, SIZE * 12);//´´½¨´°¿Ú
-	Loadimg(); //¼ÓÔØÍ¼Æ¬×ÊÔ´
+	initgraph(SIZE * 12, SIZE * 12);//åˆ›å»ºçª—å£
+	Loadimg(); //åŠ è½½å›¾ç‰‡èµ„æº
 	setbkcolor(RGB(206, 157, 113));
-	putimage(0, 0, &img[0]);//ÆåÅÌ±³¾°É«
+	putimage(0, 0, &img[0]);//æ£‹ç›˜èƒŒæ™¯è‰²
 	setlinecolor(BLACK);
 	setbkmode(TRANSPARENT);
 	settextcolor(BLACK);
@@ -529,21 +529,21 @@ void end_board()
 	line(3 * SIZE, 3 * SIZE, 3 * SIZE, SIZE * 9);
 	line(9 * SIZE, 3 * SIZE, 9 * SIZE, SIZE * 9);
 	RECT s = { 120, 40, 360, 120 };
-	drawtext(_T("ÓÎÏ·½áÊø"), &s, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("æ¸¸æˆç»“æŸ"), &s, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	RECT r = { 120, 120, 360, 240 };
-	drawtext(_T("ÖØĞÂ¿ªÊ¼"), &r, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("é‡æ–°å¼€å§‹"), &r, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	RECT t = { 120, 240, 360, 360 };
-	drawtext(_T("ÍË³öÓÎÏ·"), &t, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("é€€å‡ºæ¸¸æˆ"), &t, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
 }
 
 
 void begin_board()
 {
-	initgraph(SIZE * 12, SIZE * 12);//´´½¨´°¿Ú
-	Loadimg(); //¼ÓÔØÍ¼Æ¬×ÊÔ´
+	initgraph(SIZE * 12, SIZE * 12);//åˆ›å»ºçª—å£
+	Loadimg(); //åŠ è½½å›¾ç‰‡èµ„æº
 	setbkcolor(RGB(206, 157, 113));
-	putimage(0, 0, &img[0]);//ÆåÅÌ±³¾°É«
+	putimage(0, 0, &img[0]);//æ£‹ç›˜èƒŒæ™¯è‰²
 	setlinecolor(BLACK);
 	setbkmode(TRANSPARENT);
 	settextcolor(BLACK);
@@ -553,11 +553,11 @@ void begin_board()
 	line(3 * SIZE, 3 * SIZE, 3 * SIZE, SIZE * 9);
 	line(9 * SIZE, 3 * SIZE, 9 * SIZE, SIZE * 9);
 	RECT s = { 120, 40, 360, 120 };
-	drawtext(_T("Îå×ÓÆå"), &s, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("äº”å­æ£‹"), &s, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	RECT r = { 120, 120, 360, 240 };
-	drawtext(_T("Íæ¼Ò¶ÔÕ½"), &r, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("ç©å®¶å¯¹æˆ˜"), &r, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	RECT t = { 120, 240, 360, 360 };
-	drawtext(_T("ÈË»ú¶ÔÕ½"), &t, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("äººæœºå¯¹æˆ˜"), &t, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
 }
 
@@ -565,11 +565,11 @@ void begin_board()
 
 void chose_board()
 {
-	initgraph(SIZE * 12, SIZE * 12);//´´½¨´°¿Ú
-	Loadimg(); //¼ÓÔØÍ¼Æ¬×ÊÔ´
+	initgraph(SIZE * 12, SIZE * 12);//åˆ›å»ºçª—å£
+	Loadimg(); //åŠ è½½å›¾ç‰‡èµ„æº
 	setbkcolor(RGB(206, 157, 113));
 
-	putimage(0, 0, &img[0]);//ÆåÅÌ±³¾°É«
+	putimage(0, 0, &img[0]);//æ£‹ç›˜èƒŒæ™¯è‰²
 	setlinecolor(BLACK);
 	setbkmode(TRANSPARENT);
 	settextcolor(BLACK);
@@ -579,39 +579,39 @@ void chose_board()
 	line(3 * SIZE, 3 * SIZE, 3 * SIZE, SIZE * 9);
 	line(9 * SIZE, 3 * SIZE, 9 * SIZE, SIZE * 9);
 	RECT s = { 120, 40, 360, 120 };
-	drawtext(_T("ÈË»ú¶ÔÕ½"), &s, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("äººæœºå¯¹æˆ˜"), &s, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	RECT r = { 120, 120, 360, 240 };
-	drawtext(_T("AIÏÈÊÖ"), &r, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("AIå…ˆæ‰‹"), &r, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	RECT t = { 120, 240, 360, 360 };
-	drawtext(_T("Íæ¼ÒÏÈÊÖ"), &t, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	drawtext(_T("ç©å®¶å…ˆæ‰‹"), &t, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
 }
 
-void PlayPVP() //Íæ¼Ò¶ÔÕ½
+void PlayPVP() //ç©å®¶å¯¹æˆ˜
 {
 	initmap();
 	play_board();
 	gg = true;
 	while (gg)
 	{
-		Click();//Âä×Ó
+		Click();//è½å­
 		
 
 		if (Judge(1))
-		{//ÅĞ¶ÏºÚ×ÓÊÇ·ñ»ñÊ¤
-			MessageBox(NULL, _T("ºÚ×Ó»ñÊ¤£¡"), _T("ÓÎÏ·ÌáÊ¾"), MB_OK | MB_SYSTEMMODAL);
+		{//åˆ¤æ–­é»‘å­æ˜¯å¦è·èƒœ
+			MessageBox(NULL, _T("é»‘å­è·èƒœï¼"), _T("æ¸¸æˆæç¤º"), MB_OK | MB_SYSTEMMODAL);
 			gg = false;
 			break;
 		}
 		if (Judge(2))
-		{//ÅĞ¶Ï°××ÓÊÇ·ñ»ñÊ¤
-			MessageBox(NULL, _T("°××Ó»ñÊ¤£¡"), _T("ÓÎÏ·ÌáÊ¾"), MB_OK | MB_SYSTEMMODAL);
+		{//åˆ¤æ–­ç™½å­æ˜¯å¦è·èƒœ
+			MessageBox(NULL, _T("ç™½å­è·èƒœï¼"), _T("æ¸¸æˆæç¤º"), MB_OK | MB_SYSTEMMODAL);
 			gg = false;
 			break;
 		}
 		if (Tie())
-		{//Èç¹ûÓÎÏ·Æ½¾Ö
-			MessageBox(NULL, _T("Æì¹ÄÏàµ±µÄ¶ÔÊÖ£¡"), _T("ÓÎÏ·ÌáÊ¾"), MB_OK | MB_SYSTEMMODAL);
+		{//å¦‚æœæ¸¸æˆå¹³å±€
+			MessageBox(NULL, _T("æ——é¼“ç›¸å½“çš„å¯¹æ‰‹ï¼"), _T("æ¸¸æˆæç¤º"), MB_OK | MB_SYSTEMMODAL);
 			gg = false;
 			break;
 		}
@@ -645,7 +645,7 @@ public:
 
 	void order()
 	{
-		// list3 ÖĞ×îºóÒ»¸öÂä×Ó
+		// list3 ä¸­æœ€åä¸€ä¸ªè½å­
 		int last_pt[2] = { 0 };
 
 		int t = 0;
@@ -658,14 +658,14 @@ public:
 
 		int i = 0;
 		while (blank_list[i][0] != -1)
-		{//ÔÚ×îºóÂä×Ó¸½½üËÑË÷ÊÇ·ñÓĞ¿ÉÒÔÂä×ÓµÄµã
+		{//åœ¨æœ€åè½å­é™„è¿‘æœç´¢æ˜¯å¦æœ‰å¯ä»¥è½å­çš„ç‚¹
 			for (int j = -1; j < 2; j++)
 			{
 				for (int k = -1; k < 2; k++)
-				{//µ± i = j = 0 ÊÇ±íÊ¾×îºóÂä×Ó, ÒòÎªÔÚÆä¸½½üËÑË÷ËùÒÔÉáÆú i = j = 0;
+				{//å½“ i = j = 0 æ˜¯è¡¨ç¤ºæœ€åè½å­, å› ä¸ºåœ¨å…¶é™„è¿‘æœç´¢æ‰€ä»¥èˆå¼ƒ i = j = 0;
 					if (j == 0 && k == 0) continue;
 					else if (blank_list[i][0] == (last_pt[0] + j) && blank_list[i][1] == (last_pt[1] + k))
-					{//µ±×îºóÂä×Óµã¸½½üÓĞ¿ÉÑ¡µãÊ±, ÏÈ´ÓÉ¾³ı, È»ºó´ÓºòÑ¡µãÁĞ±íÊ×²¿²åÈë
+					{//å½“æœ€åè½å­ç‚¹é™„è¿‘æœ‰å¯é€‰ç‚¹æ—¶, å…ˆä»åˆ é™¤, ç„¶åä»å€™é€‰ç‚¹åˆ—è¡¨é¦–éƒ¨æ’å…¥
 						int p = i;
 						for (p = i; p > 0; p--)
 						{
@@ -700,13 +700,13 @@ public:
 	{
 		if (is_mine)
 		{
-			double add_score = 0; //¼Ó·ÖÏî
-			//ÔÚÒ»¸ö·½ÏòÉÏ£¬ Ö»È¡×î´óµÄµÃ·ÖÏî
+			double add_score = 0; //åŠ åˆ†é¡¹
+			//åœ¨ä¸€ä¸ªæ–¹å‘ä¸Šï¼Œ åªå–æœ€å¤§çš„å¾—åˆ†é¡¹
 			double max_score = 0;
 			int max_score_shape[6][2] = { {-2,-2},{-2,-2},{-2,-2},{-2,-2},{-2,-2},{-2,-2} };
 			int max_score_direct[2] = { -2,-2 };
 
-			//Èç¹û´Ë·½ÏòÉÏ£¬¸ÃµãÒÑ¾­ÓĞµÃ·ÖĞÎ×´£¬²»ÖØ¸´¼ÆËã
+			//å¦‚æœæ­¤æ–¹å‘ä¸Šï¼Œè¯¥ç‚¹å·²ç»æœ‰å¾—åˆ†å½¢çŠ¶ï¼Œä¸é‡å¤è®¡ç®—
 			int p = 0;
 			while (score_all_arr[p] != -2)
 			{
@@ -796,7 +796,7 @@ public:
 
 				}
 			}
-			//¼ÆËãÁ½¸öĞÎ×´Ïà½»£¬ ÈçÁ½¸ö3»î Ïà½»£¬ µÃ·ÖÔö¼Ó Ò»¸ö×ÓµÄ³ıÍâ
+			//è®¡ç®—ä¸¤ä¸ªå½¢çŠ¶ç›¸äº¤ï¼Œ å¦‚ä¸¤ä¸ª3æ´» ç›¸äº¤ï¼Œ å¾—åˆ†å¢åŠ  ä¸€ä¸ªå­çš„é™¤å¤–
 			if (max_score_direct[1] != -2 && a == 1)
 			{
 				p = 0;
@@ -850,13 +850,13 @@ public:
 		else
 		{
 
-			double add_score = 0; //¼Ó·ÖÏî
-			//ÔÚÒ»¸ö·½ÏòÉÏ£¬ Ö»È¡×î´óµÄµÃ·ÖÏî
+			double add_score = 0; //åŠ åˆ†é¡¹
+			//åœ¨ä¸€ä¸ªæ–¹å‘ä¸Šï¼Œ åªå–æœ€å¤§çš„å¾—åˆ†é¡¹
 			double max_score = 0;
 			int max_score_shape[6][2] = { {-2,-2},{-2,-2},{-2,-2},{-2,-2},{-2,-2},{-2,-2} };
 			int max_score_direct[2] = { -2,-2 };
 
-			//Èç¹û´Ë·½ÏòÉÏ£¬¸ÃµãÒÑ¾­ÓĞµÃ·ÖĞÎ×´£¬²»ÖØ¸´¼ÆËã
+			//å¦‚æœæ­¤æ–¹å‘ä¸Šï¼Œè¯¥ç‚¹å·²ç»æœ‰å¾—åˆ†å½¢çŠ¶ï¼Œä¸é‡å¤è®¡ç®—
 			int p = 0;
 			while (score_all_enemy_arr[p] != -2)
 			{
@@ -961,7 +961,7 @@ public:
 				}
 
 			}
-			//¼ÆËãÁ½¸öĞÎ×´Ïà½»£¬ ÈçÁ½¸ö3»î Ïà½»£¬ µÃ·ÖÔö¼Ó Ò»¸ö×ÓµÄ³ıÍâ
+			//è®¡ç®—ä¸¤ä¸ªå½¢çŠ¶ç›¸äº¤ï¼Œ å¦‚ä¸¤ä¸ª3æ´» ç›¸äº¤ï¼Œ å¾—åˆ†å¢åŠ  ä¸€ä¸ªå­çš„é™¤å¤–
 
 			if (max_score_direct[1] != -2 && a == 1)
 			{
@@ -1028,7 +1028,7 @@ public:
 				scoreMap[i][j] = 0;
 			}
 		}
-		// ÅĞ¶ÏÊÇ·ñÎª ai ·½
+		// åˆ¤æ–­æ˜¯å¦ä¸º ai æ–¹
 		if (is_ai)
 		{
 			for (int i = 0; i < 250; i++)
@@ -1066,9 +1066,9 @@ public:
 
 		pt[0] = -1;
 		pt[1] = -1;
-		//Ëã×Ô¼ºµÄµÃ·Ö
+		//ç®—è‡ªå·±çš„å¾—åˆ†
 		bool is_mine = true;
-		//double score_all_arr[250] = { 0 };  //µÃ·ÖĞÎ×´µÄÎ»ÖÃ ÓÃÓÚ¼ÆËãÈç¹ûÓĞÏà½» µÃ·Ö·­±¶  ×Ô¼º
+		//double score_all_arr[250] = { 0 };  //å¾—åˆ†å½¢çŠ¶çš„ä½ç½® ç”¨äºè®¡ç®—å¦‚æœæœ‰ç›¸äº¤ å¾—åˆ†ç¿»å€  è‡ªå·±
 		for (int i = 0; i < 250; i++) {
 			score_all_arr[i] = -2;
 		}
@@ -1106,7 +1106,7 @@ public:
 			//my_lastscore = pos_score;
 		}
 
-		//ËãµĞÈËµÄµÃ·Ö£¬ ²¢¼õÈ¥
+		//ç®—æ•Œäººçš„å¾—åˆ†ï¼Œ å¹¶å‡å»
 
 		for (int i = 0; i < 250; i++) {
 			score_all_enemy_arr[i] = -2;
@@ -1148,7 +1148,7 @@ public:
 			//}
 		}
 
-		//±¾·½·ÖÊı ¼õÈ¥ µĞ·½·ÖÊı
+		//æœ¬æ–¹åˆ†æ•° å‡å» æ•Œæ–¹åˆ†æ•°
 		total_score = my_score - enemy_score * ratio * 0.11;
 
 		return total_score;
@@ -1181,15 +1181,15 @@ public:
 
 		if (Judge1(1) || Judge1(2) || depth == 0)
 			return evaluation(is_AI);
-		//list_all - list3 = { ¿ÉÂä×ÓµÄµã¼¯ }
+		//list_all - list3 = { å¯è½å­çš„ç‚¹é›† }
 
 		update_list3();
 
 		update_blank();
 
-		order();  // °´ËÑË÷Ë³ĞòÅÅĞò  Ìá¸ß¼ôÖ¦Ğ§ÂÊ
+		order();  // æŒ‰æœç´¢é¡ºåºæ’åº  æé«˜å‰ªææ•ˆç‡
 
-			//±éÀúÃ¿Ò»¸öºòÑ¡²½
+			//éå†æ¯ä¸€ä¸ªå€™é€‰æ­¥
 		int i = 0; search_count = 0;
 		while (blank_list[i][0] != -1)
 		{
@@ -1233,10 +1233,10 @@ public:
 			list3[j][1] = next_step[1];
 			//update_blank();
 
-					//·µ»Øµ½ÉÏÒ»²ã½ÚµãÊ±£¬»á¸ø³ö·ÖÊıµÄÏà·´Êı(ÒòÎª·µ»ØµÄÖµÏàµ±ÓÚÊÇÔÚ¶ÔÊÖµÄÑ¡ÔñÏÂ¶ÔÊÖ¶Ôµ±Ç°ÆåÅÌµÄÆÀ¹À·ÖÊı, ¶ø×÷ÎªËûµÄ¶ÔÁ¢·½, Òª°Ñ·ÖÊıÈ¡·´)
-					//alpha¿ÉÒÔÊÓÎªµ±Ç°Çé¿öÏÂ£¬µ±Ç°ÆåÊÖ¿ÉÒÔµÃµ½µÄ×îºÃÖµ£¬µ±Ç°ÆåÊÖµÃµ½×îºÃÖµ == ¶ÔÊÖ²»Ô¸Òâ½ÓÊÜµÄ×î²îÖµ£¬ÒòÎª¶ÔÊÖĞèÒª²»¶ÏÌá¸ß
+					//è¿”å›åˆ°ä¸Šä¸€å±‚èŠ‚ç‚¹æ—¶ï¼Œä¼šç»™å‡ºåˆ†æ•°çš„ç›¸åæ•°(å› ä¸ºè¿”å›çš„å€¼ç›¸å½“äºæ˜¯åœ¨å¯¹æ‰‹çš„é€‰æ‹©ä¸‹å¯¹æ‰‹å¯¹å½“å‰æ£‹ç›˜çš„è¯„ä¼°åˆ†æ•°, è€Œä½œä¸ºä»–çš„å¯¹ç«‹æ–¹, è¦æŠŠåˆ†æ•°å–å)
+					//alphaå¯ä»¥è§†ä¸ºå½“å‰æƒ…å†µä¸‹ï¼Œå½“å‰æ£‹æ‰‹å¯ä»¥å¾—åˆ°çš„æœ€å¥½å€¼ï¼Œå½“å‰æ£‹æ‰‹å¾—åˆ°æœ€å¥½å€¼ == å¯¹æ‰‹ä¸æ„¿æ„æ¥å—çš„æœ€å·®å€¼ï¼Œå› ä¸ºå¯¹æ‰‹éœ€è¦ä¸æ–­æé«˜
 			value = -negamax(!is_AI, depth - 1, -beta, -alpha);
-			//½«¸Õ²Å×ßÆåÒÆ³ı
+			//å°†åˆšæ‰èµ°æ£‹ç§»é™¤
 			if (is_AI)
 			{
 				int j = 0;
@@ -1289,15 +1289,15 @@ public:
 
 
 			if (value > alpha)
-			{//µ±depth == DEPTHÊ±, ÓÉÓÚÔÚÑ­»·ÄÚ²»¶Ïµü´ú, ×Ü»áÔÚ¿¼ÂÇºóÈı²½ÆåµÄÇé¿öÏÂÖğ½¥ÕÒµ½×îºÃµÄ×ß×Ó·½Ê½;
-				if (depth == 5)
+			{//å½“depth == DEPTHæ—¶, ç”±äºåœ¨å¾ªç¯å†…ä¸æ–­è¿­ä»£, æ€»ä¼šåœ¨è€ƒè™‘åä¸‰æ­¥æ£‹çš„æƒ…å†µä¸‹é€æ¸æ‰¾åˆ°æœ€å¥½çš„èµ°å­æ–¹å¼;
+				if (depth == 3)
 				{
 					next_point[0] = next_step[0];
 					next_point[1] = next_step[1];
 				}
 				if (value >= beta)
-				{//alpha + beta¼ôÖ¦µã
-				//µ±µ±Ç°value > beta Ê±Ïàµ±ÓÚ ¶ÔÊÖµÄ value < -alpha, ¶ÔÊÖ¿Ï¶¨²»»á¿¼ÂÇÕâ¸öÑ¡Ôñ
+				{//alpha + betaå‰ªæç‚¹
+				//å½“å½“å‰value > beta æ—¶ç›¸å½“äº å¯¹æ‰‹çš„ value < -alpha, å¯¹æ‰‹è‚¯å®šä¸ä¼šè€ƒè™‘è¿™ä¸ªé€‰æ‹©
 					cut_count += 1;
 					return beta;
 				}
@@ -1315,17 +1315,17 @@ public:
 		search_count = 0;
 		fill_list();
 		update_list3();
-		negamax(true, 5, -99999999, 99999999);//³õÊ¼»¯ ¸ºÖµ¼«´óËã·¨
+		negamax(true, 3, -99999999, 99999999);//åˆå§‹åŒ– è´Ÿå€¼æå¤§ç®—æ³•
 		//move.x = next_point[0];
 		//move.y = next_point[1];
 		last_pos[0] = next_point[0];
 		last_pos[1] = next_point[1];
-		cout << "±¾´Î¹²¼ôÖ¦´ÎÊı£º" << cut_count << endl;
-		cout << "±¾´Î¹²ËÑË÷´ÎÊı£º" << search_count << endl;
+		cout << "æœ¬æ¬¡å…±å‰ªææ¬¡æ•°ï¼š" << cut_count << endl;
+		cout << "æœ¬æ¬¡å…±æœç´¢æ¬¡æ•°ï¼š" << search_count << endl;
 		//return move;
 	}
 
-	void PlayPVE() //ÈË»ú¶ÔÕ½
+	void PlayPVE() //äººæœºå¯¹æˆ˜
 	{
 		initmap();
 		play_board();
@@ -1348,7 +1348,7 @@ public:
 					//update_blank();
 					map[7][7] = 1;
 					black++; turn = is_ai();
-					Drawmap(7, 7);//¸üĞÂµØÍ¼
+					Drawmap(7, 7);//æ›´æ–°åœ°å›¾
 
 					Judge_ending();
 					if (!gg)break;
@@ -1370,19 +1370,19 @@ public:
 					update_list33();
 					//update_blank();
 					if (flag)
-					{//AIÏÈÊÖ ºÚ×Ó
+					{//AIå…ˆæ‰‹ é»‘å­
 						map[xpos][ypos] = 1;
 						black++; turn = is_ai();
-						Drawmap(xpos, ypos);//¸üĞÂµØÍ¼
+						Drawmap(xpos, ypos);//æ›´æ–°åœ°å›¾
 						Judge_ending();
 						if (!gg)break;
 
 					}
 					else if (!flag)
-					{//AIºóÊÖ °××Ó
+					{//AIåæ‰‹ ç™½å­
 						map[xpos][ypos] = 2;
 						white++; turn = is_ai();
-						Drawmap(xpos, ypos);//¸üĞÂµØÍ¼
+						Drawmap(xpos, ypos);//æ›´æ–°åœ°å›¾
 						Judge_ending();
 						if (!gg)break;
 					}
@@ -1394,17 +1394,17 @@ public:
 			{
 				int c = 0;
 
-				//Drawmap();//¸üĞÂµØÍ¼
+				//Drawmap();//æ›´æ–°åœ°å›¾
 				Judge_ending();
 				if (!gg)break;
 
-				ExMessage m;//ÏûÏ¢±äÁ¿
+				ExMessage m;//æ¶ˆæ¯å˜é‡
 				flushmessage(EX_MOUSE);
 				while (1)
 				{
-					m = getmessage(EX_MOUSE);//µÃµ½Êó±êÏûÏ¢
+					m = getmessage(EX_MOUSE);//å¾—åˆ°é¼ æ ‡æ¶ˆæ¯
 					if (m.message == WM_LBUTTONDOWN) {
-						ipos = (int)(((double)m.x) / SIZE);//»»ËãÊó±êÎ»ÖÃ
+						ipos = (int)(((double)m.x) / SIZE);//æ¢ç®—é¼ æ ‡ä½ç½®
 						jpos = (int)(((double)m.y) / SIZE);
 						if (map[ipos][jpos] == 0)
 							break;
@@ -1414,20 +1414,20 @@ public:
 				last_pos[0] = ipos;
 				last_pos[1] = jpos;
 				if (map[ipos][jpos] == 0 && !flag && c == 0 && !turn)
-				{//humanÏÈÊÖ ºÚ×Ó
+				{//humanå…ˆæ‰‹ é»‘å­
 					map[ipos][jpos] = 1;
 					black++; turn = is_ai();
 					c++;
-					Drawmap(ipos, jpos);//¸üĞÂµØÍ¼
+					Drawmap(ipos, jpos);//æ›´æ–°åœ°å›¾
 					Judge_ending();
 					if (!gg)break;
 
 				}
 				else if (map[ipos][jpos] == 0 && !turn && c == 0)
-				{//humanºóÊÖ °××Ó
+				{//humanåæ‰‹ ç™½å­
 					map[ipos][jpos] = 2;
 					white++; c++; turn = is_ai();
-					Drawmap(ipos, jpos);//¸üĞÂµØÍ¼
+					Drawmap(ipos, jpos);//æ›´æ–°åœ°å›¾
 					Judge_ending();
 					if (!gg)break;
 				}
@@ -1448,7 +1448,7 @@ public:
 };
 
 
-void Click3() //ÈË»ú¶ÔÕ½Ñ¡ÔñË­ÏÈÊÖ
+void Click3() //äººæœºå¯¹æˆ˜é€‰æ‹©è°å…ˆæ‰‹
 {
 	gg = true;
 	while (gg)
@@ -1456,12 +1456,12 @@ void Click3() //ÈË»ú¶ÔÕ½Ñ¡ÔñË­ÏÈÊÖ
 		ExMessage m;
 		flushmessage(EX_MOUSE);
 		//ExMessage getmessage(BYTE filter = EX_MOUSE);
-		m = getmessage(EX_MOUSE);//µÃµ½Êó±êÏûÏ¢
-		if (m.message == WM_LBUTTONDOWN)//Êó±ê×ó¼ü°´ÏÂ
+		m = getmessage(EX_MOUSE);//å¾—åˆ°é¼ æ ‡æ¶ˆæ¯
+		if (m.message == WM_LBUTTONDOWN)//é¼ æ ‡å·¦é”®æŒ‰ä¸‹
 		{
 			if ((int)m.x >= 125 && (int)m.x <= 355 && (int)m.y >= 125 && (int)m.y <= 235)                 // RECT r = { 120, 120, 360, 240 };RECT t = { 120, 240, 360, 360 };
 			{
-				flag = 1;//aiÏÈ
+				flag = 1;//aiå…ˆ
 				gg = false;
 			}
 			else if ((int)m.x >= 125 && (int)m.x <= 355 && (int)m.y >= 245 && (int)m.y <= 355)
@@ -1482,8 +1482,8 @@ void Click1() //PVP or PVE
 		flushmessage(EX_MOUSE);
 		//ExMessage m;
 		//ExMessage getmessage(BYTE filter = EX_MOUSE);
-		m = getmessage(EX_MOUSE);//µÃµ½Êó±êÏûÏ¢
-		if (m.message == WM_LBUTTONDOWN)//Êó±ê×ó¼ü°´ÏÂ
+		m = getmessage(EX_MOUSE);//å¾—åˆ°é¼ æ ‡æ¶ˆæ¯
+		if (m.message == WM_LBUTTONDOWN)//é¼ æ ‡å·¦é”®æŒ‰ä¸‹
 		{
 			if ((int)m.x >= 125 && (int)m.x <= 355 && (int)m.y >= 125 && (int)m.y <= 235)                  // RECT r = { 120, 120, 360, 240 };RECT t = { 120, 240, 360, 360 };
 			{
@@ -1512,8 +1512,8 @@ void Click2() // again or exit
 		ExMessage m;
 		flushmessage(EX_MOUSE);
 		//ExMessage getmessage(BYTE filter = EX_MOUSE);
-		m = getmessage(EX_MOUSE);//µÃµ½Êó±êÏûÏ¢
-		if (m.message == WM_LBUTTONDOWN)//Êó±ê×ó¼ü°´ÏÂ
+		m = getmessage(EX_MOUSE);//å¾—åˆ°é¼ æ ‡æ¶ˆæ¯
+		if (m.message == WM_LBUTTONDOWN)//é¼ æ ‡å·¦é”®æŒ‰ä¸‹
 		{
 			if ((int)m.x >= 125 && (int)m.x <= 355 && (int)m.y >= 125 && (int)m.y <= 235)                 // RECT r = { 120, 120, 360, 240 };RECT t = { 120, 240, 360, 360 };
 			{
